@@ -8,23 +8,42 @@ public class PlayerControllerScript : MonoBehaviour {
     bool facingRight = true;
     Animator anim;
 
-	// Use this for initialization
-	void Start () {
+    bool grounded = false;
+    public GameObject groundCheck;
+    float groundRadius = 0.2f;
+    public LayerMask whatIsGround;
+    public float jumpForce = 700f;
+    
+
+    // Use this for initialization
+    void Start () {
         anim = GetComponent<Animator>();
 
     }
 	
-	// Update is called once per frame
-	void Update () {
-        
+	// Update is called once per frame - Good for input/game mechanic updating
+	void Update ()
+    {
+        if(grounded && Input.GetKeyDown(KeyCode.Space))
+        {
+            anim.SetBool("ground", false);
+            GetComponent<Rigidbody2D>().AddForce(new Vector2(0, jumpForce));
+        }
 	}
 
     // Called at set interval each time. Good for physics
     void FixedUpdate()
     {
+        Rigidbody2D rigidBodyComp = GetComponent<Rigidbody2D>();
+
+        grounded = Physics2D.OverlapCircle(groundCheck.transform.position, groundRadius, whatIsGround);
+        anim.SetBool("ground", grounded);
+
+        anim.SetFloat("vSpeed", rigidBodyComp.velocity.y);
+
         float move = Input.GetAxis("Horizontal");
 
-        GetComponent<Rigidbody2D>().velocity = new Vector2(move * maxSpeed, GetComponent<Rigidbody2D>().velocity.y);
+        rigidBodyComp.velocity = new Vector2(move * maxSpeed, rigidBodyComp.velocity.y);
 
         anim.SetFloat("speed", Mathf.Abs(move));
 
