@@ -64,4 +64,12 @@ public class PlayerControllerScript : MonoBehaviour {
         scale.x *= -1;
         transform.localScale = scale;
     }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if(other.gameObject.tag == "PickupObject")
+        {
+            other.gameObject.GetComponent<PickupControllerScript>().onPickupTriggered(this.gameObject);
+        }
+    }
 }
