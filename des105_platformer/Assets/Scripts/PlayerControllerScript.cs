@@ -7,6 +7,7 @@ public class PlayerControllerScript : MonoBehaviour {
     public float maxSpeed = 10f;
     bool facingRight = true;
     Animator anim;
+    bool movementAllowed = true;
 
     bool grounded = false;
     public GameObject groundCheck;
@@ -24,7 +25,7 @@ public class PlayerControllerScript : MonoBehaviour {
 	// Update is called once per frame - Good for input/game mechanic updating
 	void Update ()
     {
-        if(grounded && Input.GetKeyDown(KeyCode.Space))
+        if(grounded && Input.GetKeyDown(KeyCode.Space) && movementAllowed)
         {
             anim.SetBool("ground", false);
             GetComponent<Rigidbody2D>().AddForce(new Vector2(0, jumpForce));
@@ -43,17 +44,30 @@ public class PlayerControllerScript : MonoBehaviour {
 
         float move = Input.GetAxis("Horizontal");
 
-        rigidBodyComp.velocity = new Vector2(move * maxSpeed, rigidBodyComp.velocity.y);
-
-        anim.SetFloat("speed", Mathf.Abs(move));
+        if (movementAllowed)
+        {
+            rigidBodyComp.velocity = new Vector2(move * maxSpeed, rigidBodyComp.velocity.y);
+            anim.SetFloat("speed", Mathf.Abs(move));
+        }
+        else
+        {
+            rigidBodyComp.velocity = new Vector2(Mathf.SmoothStep(rigidBodyComp.velocity.x, 0, Time.deltaTime), rigidBodyComp.velocity.y);
+            anim.SetFloat("speed", Mathf.Abs(rigidBodyComp.velocity.x / maxSpeed));
+        }
+        
 
         if (move > 0 && !facingRight)
         {
             Flip();
         }
-        else if(move < 0 && facingRight)
+        else if (move < 0 && facingRight)
         {
             Flip();
+        }
+
+        if(rigidBodyComp.position.y <= -10f)
+        {
+            PlayerEndGame();
         }
     }
 
@@ -69,7 +83,18 @@ public class PlayerControllerScript : MonoBehaviour {
     {
         if(other.gameObject.tag == "PickupObject")
         {
-            other.gameObject.GetComponent<PickupControllerScript>().onPickupTriggered(this.gameObject);
+            other.gameObject.GetComponent<PickupControllerScript>().onPickupTriggered();
         }
+        else if(other.gameObject.tag == "ExitGate")
+        {
+            PlayerEndGame();
+        }
+    }
+
+    private void PlayerEndGame()
+    {
+        movementAllowed = false;
+        GameObject gameOverView = GameObject.Find("GameOverView");
+        gameOverView.GetComponent<GameOverControllerScript>().BeginEndGame();
     }
 }

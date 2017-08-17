@@ -10,7 +10,6 @@ public class PickupControllerScript : MonoBehaviour {
 
     private bool particlesTriggered = false;
     private bool triggered = false;
-    private GameObject triggeredPlayer;
     private SpriteRenderer spriteRenderer;
     private float fadeTimerStart;
 
@@ -43,9 +42,8 @@ public class PickupControllerScript : MonoBehaviour {
         }
 	}
 
-    public void onPickupTriggered(GameObject player)
+    public void onPickupTriggered()
     {
-        triggeredPlayer = player;
         triggered = true;
     }
 }
