@@ -14,7 +14,6 @@ public class PlayerControllerScript : MonoBehaviour {
     float groundRadius = 0.2f;
     public LayerMask whatIsGround;
     public float jumpForce = 700f;
-    
 
     // Use this for initialization
     void Start () {
@@ -48,21 +47,30 @@ public class PlayerControllerScript : MonoBehaviour {
         {
             rigidBodyComp.velocity = new Vector2(move * maxSpeed, rigidBodyComp.velocity.y);
             anim.SetFloat("speed", Mathf.Abs(move));
+
+            if (move > 0 && !facingRight)
+            {
+                Flip();
+            }
+            else if (move < 0 && facingRight)
+            {
+                Flip();
+            }
         }
         else
         {
-            rigidBodyComp.velocity = new Vector2(Mathf.SmoothStep(rigidBodyComp.velocity.x, 0, Time.deltaTime), rigidBodyComp.velocity.y);
-            anim.SetFloat("speed", Mathf.Abs(rigidBodyComp.velocity.x / maxSpeed));
-        }
-        
+            if(rigidBodyComp.velocity.x > 0)
+            {
+                float newXVelocity = rigidBodyComp.velocity.x - maxSpeed * Time.deltaTime;
+                rigidBodyComp.velocity = new Vector2(Mathf.Max(0f, newXVelocity), rigidBodyComp.velocity.y);
+            }
+            else if(rigidBodyComp.velocity.y < 0)
+            {
+                float newXVelocity = rigidBodyComp.velocity.x + maxSpeed * Time.deltaTime;
+                rigidBodyComp.velocity = new Vector2(Mathf.Min(0f, newXVelocity), rigidBodyComp.velocity.y);
+            }
 
-        if (move > 0 && !facingRight)
-        {
-            Flip();
-        }
-        else if (move < 0 && facingRight)
-        {
-            Flip();
+            anim.SetFloat("speed", Mathf.Abs(rigidBodyComp.velocity.x / maxSpeed));
         }
 
         if(rigidBodyComp.position.y <= -10f)
